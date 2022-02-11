@@ -1,6 +1,4 @@
-package ast.definitions;
-
-import ast.types.Type;
+package ast;
 
 public interface Definition {
     public Type getType();

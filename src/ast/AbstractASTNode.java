@@ -1,10 +1,13 @@
 package ast;
 
-public class DefaultNode implements ASTNode{
+public class AbstractASTNode implements ASTNode{
 
-    //IGUAL SE TIENE QUE BORRAR
-    
     private int column, line;
+
+    public  AbstractASTNode(int line, int column){
+        this.line = line;
+        this.column = column;
+    }
 
     @Override
     public int getLine() {

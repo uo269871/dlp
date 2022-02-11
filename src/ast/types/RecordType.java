@@ -1,5 +1,14 @@
 package ast.types;
 
-public class RecordType extends DefaultType {
-    // private List<RecordField> parameters;
+import java.util.ArrayList;
+import java.util.List;
+
+public class RecordType extends AbstractType {
+    private List<RecordField> fields;
+
+    public RecordType(List<RecordField> fields, int line, int column) {
+        super(line, column);
+        this.fields = new ArrayList<>(fields);
+    }
+
 }

@@ -1,7 +1,4 @@
-package ast.expresssions;
-
-import ast.ASTNode;
-import ast.types.Type;
+package ast;
 
 public interface Expression extends ASTNode {
     public Type getType();

@@ -1,24 +1,14 @@
 package ast;
 
-import ast.definitions.Definition;
-
+import java.util.ArrayList;
 import java.util.List;
 
-public class Program implements ASTNode {
+public class Program extends AbstractASTNode {
 
     private List<Definition> definitions;
 
-    public Program(int column, int line){
-
-    }
-
-    @Override
-    public int getLine() {
-        return 0;
-    }
-
-    @Override
-    public int getColumn() {
-        return 0;
+    public Program(List<Definition> definitions,int line, int column){
+        super(line,column);
+        definitions = new ArrayList<>(definitions);
     }
 }

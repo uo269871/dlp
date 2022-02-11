@@ -1,5 +1,10 @@
 package ast.types;
 
-public class VoidType extends DefaultType {
+import ast.types.AbstractType;
 
+public class VoidType extends AbstractType {
+
+    public VoidType(int line, int column) {
+        super(line, column);
+    }
 }

@@ -9,6 +9,6 @@ public class Program extends AbstractASTNode {
 
     public Program(List<Definition> definitions,int line, int column){
         super(line,column);
-        definitions = new ArrayList<>(definitions);
+        this.definitions = new ArrayList<>(definitions);
     }
 }

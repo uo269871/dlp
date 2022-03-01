@@ -1,5 +1,12 @@
 // Generated from C:/Users/Miguel/IdeaProjects/dlp/src/parser\Pmm.g4 by ANTLR 4.9.2
 package parser;
+
+    import ast.*;
+    import ast.definitions.*;
+    import ast.expressions.*;
+    import ast.statements.*;
+    import ast.types.*;
+
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
@@ -52,7 +59,7 @@ public class PmmBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements Pm
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSentence(PmmParser.SentenceContext ctx) { return visitChildren(ctx); }
+	@Override public T visitStatement(PmmParser.StatementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -60,6 +67,13 @@ public class PmmBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements Pm
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitBody(PmmParser.BodyContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitExpressions(PmmParser.ExpressionsContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

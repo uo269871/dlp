@@ -2,7 +2,16 @@ package ast.types;
 
 public class DoubleType extends AbstractType {
 
-    public DoubleType(int line, int column) {
-        super(line, column);
+    private static DoubleType doubleInstace;
+
+    // Métodos de la clase RealType:
+    private DoubleType(){
+        super(0,0);
+    }
+
+    public static DoubleType getInstance(){
+        if (doubleInstace == null)
+            doubleInstace = new DoubleType();
+        return doubleInstace;
     }
 }

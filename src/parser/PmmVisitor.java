@@ -30,17 +30,17 @@ public interface PmmVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDefinition(PmmParser.DefinitionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PmmParser#varDefinition}.
+	 * Visit a parse tree produced by {@link PmmParser#varDefList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitVarDefinition(PmmParser.VarDefinitionContext ctx);
+	T visitVarDefList(PmmParser.VarDefListContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PmmParser#funcDefinition}.
+	 * Visit a parse tree produced by {@link PmmParser#paramsList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFuncDefinition(PmmParser.FuncDefinitionContext ctx);
+	T visitParamsList(PmmParser.ParamsListContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PmmParser#type}.
 	 * @param ctx the parse tree
@@ -48,23 +48,29 @@ public interface PmmVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitType(PmmParser.TypeContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link PmmParser#structFields}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStructFields(PmmParser.StructFieldsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PmmParser#primitiveType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrimitiveType(PmmParser.PrimitiveTypeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PmmParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitStatement(PmmParser.StatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PmmParser#body}.
+	 * Visit a parse tree produced by {@link PmmParser#expressionList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBody(PmmParser.BodyContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link PmmParser#expressions}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExpressions(PmmParser.ExpressionsContext ctx);
+	T visitExpressionList(PmmParser.ExpressionListContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PmmParser#expression}.
 	 * @param ctx the parse tree

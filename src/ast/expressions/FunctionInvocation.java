@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionInvocation extends AbstractExpression implements Statement {
-    private Expression left,right;
     private String functionName;
     private List<Expression> functionParameters = new ArrayList<>();
 

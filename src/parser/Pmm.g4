@@ -8,50 +8,242 @@ grammar Pmm;
     import ast.types.*;
 }
 
-//program returns[Program ast]: definition+ EOF
-//       ;
-program returns[List<Expression> ast = new ArrayList<Expression>()]:
-    exps=expressions { $ast.addAll($exps.ast); } EOF
+program returns[Program ast]
+        locals [List<Definition> def = new ArrayList<Definition>(),
+        List<Statement> funcDefBody = new ArrayList<Statement>(),
+        List<String> varDefNames = new ArrayList<String>();]:
+        (d=definition {$def.addAll($d.ast);})*
+        a='def' m='main' '(' ')' ':' '{'
+        (v1=varDefList {$funcDefBody.addAll($v1.ast);} ';')*
+        (st=statement{$funcDefBody.addAll($st.ast);})* '}'
+        {$def.add(
+            new FuncDefinition(
+                $funcDefBody,
+                $m.text,
+                new FunctionType(
+                    VoidType.getInstance(),
+                    new ArrayList<VarDefinition>(),
+                    $a.getLine(),
+                    $a.getCharPositionInLine()
+                ),
+                $a.getLine(),
+                $a.getCharPositionInLine()));
+        }
+        {$ast = new Program($def, $a.getLine(), $a.getCharPositionInLine());}
+        EOF;
+
+definition returns [List<Definition> ast = new ArrayList<Definition>()]
+            locals [List<Statement> funcDefinitionBody = new ArrayList<Statement>(),
+            List<VarDefinition> functionTypeParams = new ArrayList<VarDefinition>()]:
+            a='def' ID '('
+            v=paramsList {$functionTypeParams.addAll($v.ast);}
+            ')' ':' {Type ty = VoidType.getInstance(); }
+            (pt=primitiveType {ty = $pt.ast;})?
+            '{' (v1=varDefList {$funcDefinitionBody.addAll($v1.ast);} ';')*
+            (st=statement{$funcDefinitionBody.addAll($st.ast);})*
+           '}' {
+            $ast.add(
+                new FuncDefinition(
+                    $funcDefinitionBody,
+                    $ID.text,
+                    new FunctionType(
+                        ty,
+                        $functionTypeParams,
+                        $ID.getLine(),
+                        $ID.getCharPositionInLine()
+                    ),
+                    $ID.getLine(),
+                    $ID.getCharPositionInLine()
+                )
+            );
+            }
+            | vD=varDefList {$ast.addAll($vD.ast);} ';'
     ;
 
-definition: varDefinition | funcDefinition;
-
-varDefinition: ID (','ID)* ':' type';'; // DEVUELVE UNA LISTA
-
-funcDefinition: 'def' ('main():' | (ID '(' (ID ':' type (',' ID ':' type)*)? '):' type?) ) '{' varDefinition* statement* '}';
-
-type: 'int'
-    | 'double'
-    | 'char'
-    | '['INT_CONSTANT']' type
-    | 'struct {' varDefinition+ '}'
+varDefList returns[List<VarDefinition> ast = new ArrayList<VarDefinition>()]
+        locals[List<String> variableDefNames = new ArrayList<String>()]:
+        ID1=ID {$variableDefNames.add($ID1.text);}
+        (',' ID2=ID {$variableDefNames.add($ID2.text);})* ':'
+        ty=type {
+            for (String v :$variableDefNames)
+                $ast.add(
+                    new VarDefinition(
+                        v,
+                        $ty.ast,
+                        $ID1.getLine(),
+                        $ID1.getCharPositionInLine()
+                    )
+                );
+        }
     ;
 
-statement: 'if' expression ':' body ('else' body)?
-    | 'while' expression ':' body
-    | (ID '('(expression(','expression)*)?')'
-    | expression '=' expression
-    | ('print'|'input') expression(','expression)*
-    |'return' expression)';'
+paramsList returns[List<VarDefinition> ast = new ArrayList<VarDefinition>()]:
+    (ID1=ID ':' ty1=primitiveType {
+        $ast.add(
+            new VarDefinition(
+                $ID1.text,
+                $ty1.ast,
+                $ID1.getLine(),
+                $ID1.getCharPositionInLine()
+            )
+        );
+    }
+    (',' ID2=ID ':' ty2=primitiveType {
+        $ast.add(
+            new VarDefinition(
+                $ID2.text,
+                $ty2.ast,
+                $ID2.getLine(),
+                $ID2.getCharPositionInLine()
+            )
+        );
+    })*)?
     ;
-body: statement |'{' statement+ '}';
 
-expressions returns [ArrayList<Expression> ast = new ArrayList<Expression>()] /*locals [Type t]*/:
-    exp=expression+{
-        $ast.add($exp.ast);
-        System.out.println($exp.ast.toString());
-    };
-
-expression returns[Expression ast]:
-    /*ID'(' (expression(','expression)*)?')' {
-            $ast = new FunctionInvocation(
-                $ID.text,
-                ,
-                $ID.getLine(),
-                $ID.getCharInLinePosition()+1
+type returns [Type ast]:
+    p=primitiveType { $ast = $p.ast; }
+    | '['INT_CONSTANT']' t=type {
+            $ast = new ArrayType(
+                LexerHelper.lexemeToInt($INT_CONSTANT.text),
+                $t.ast,
+                $INT_CONSTANT.getLine(),
+                $INT_CONSTANT.getCharPositionInLine()
             );
         }
-    |*/ exp1=expression'[' exp2=expression ']'{
+    | s ='struct {' fields=structFields '}' {
+            $ast = new RecordType(
+                $fields.struct,
+                $s.getLine(),
+                $s.getCharPositionInLine()
+            );
+        }
+    ;
+
+structFields returns [List<RecordField> struct = new ArrayList<RecordField>()] locals [List<String> names = new ArrayList<String>()]:
+        (ID1=ID {$names.add($ID1.text);}
+        (',' ID2=ID {$names.add($ID2.text);} )*
+        ':' t=type {
+            for(String v: $names)
+                $struct.add(
+                    new RecordField(
+                        v,
+                        $t.ast,
+                        $ID1.getLine(),
+                        $ID1.getCharPositionInLine()
+                    )
+                );
+            $names = new ArrayList<String>();
+        } ';')*
+    ;
+
+primitiveType returns [Type ast]:
+    i='int' { $ast = IntType.getInstance();}
+    | d='double' { $ast = DoubleType.getInstance();}
+    | c='char' { $ast = CharType.getInstance();}
+    ;
+
+statement returns [List<Statement> ast = new ArrayList<Statement>()]
+    locals [List<Statement> whileBody = new ArrayList<Statement>(),
+    List<Statement> ifBody = new ArrayList<Statement>(),
+    List<Statement> elseBody = new ArrayList<Statement>(),
+    List<Expression> functionParams = new ArrayList<Expression>()]:
+        'while' exp=expression ':' (
+                '{' (st=statement {$whileBody.addAll($st.ast);})* '}'
+                | (st1=statement {$whileBody.addAll($st1.ast);})
+            ) {
+                $ast.add(
+                    new WhileLoop(
+                        $whileBody,
+                        $exp.ast,
+                        $exp.ast.getLine(),
+                        $exp.ast.getColumn()
+                    )
+                );
+            }
+        | 'if' exp=expression ':' (
+            '{' (st1=statement {$ifBody.addAll($st1.ast);})* '}'
+            | st2=statement {$ifBody.addAll($st2.ast);})
+            ('else' ('{'
+                (st3=statement {$elseBody.addAll($st3.ast);})* '}'
+                | st4=statement {$elseBody.addAll($st4.ast);})
+            )?
+            {$ast.add(
+                new If_Else(
+                    $ifBody,
+                    $elseBody,
+                    $exp.ast,
+                    $exp.ast.getLine(),
+                    $exp.ast.getColumn()
+                )
+            );}
+        | ID'(' (exp1=expression {$functionParams.add($exp1.ast);}
+        (',' (exp2=expression {$functionParams.add($exp2.ast);}))*)? ')' ';'
+        {$ast.add(
+            new FunctionInvocation(
+                $ID.text,
+                $functionParams,
+                $ID.getLine(),
+                $ID.getCharPositionInLine()+1)
+            );
+        }
+        | exp1=expression '=' exp2=expression';'{
+            $ast.add(new Assignment(
+                $exp1.ast,
+                $exp2.ast,
+                $exp1.ast.getLine(),
+                $exp1.ast.getColumn()
+            ));
+        }
+        | 'print' exp1=expression {
+            $ast.add(new Print(
+                $exp1.ast,
+                $exp1.ast.getLine(),
+                $exp1.ast.getColumn()
+            ));
+        }
+        (','exp2=expression {
+                $ast.add(new Print(
+                    $exp2.ast,
+                    $exp2.ast.getLine(),
+                    $exp2.ast.getColumn()
+                ));
+            }
+        )*';'
+        | 'input' exp1=expression';'{
+            $ast.add(new Input(
+                $exp1.ast,
+                $exp1.ast.getLine(),
+                $exp1.ast.getColumn()
+            ));
+        }
+        (','exp2=expression';'{
+                $ast.add(new Input(
+                    $exp2.ast,
+                    $exp2.ast.getLine(),
+                    $exp2.ast.getColumn()
+                ));
+            }
+        )*
+        | 'return' e=expression';'{
+            $ast.add(new Return(
+                $e.ast, $e.ast.getLine(),$e.ast.getColumn()
+            ));
+        }
+    ;
+
+expression returns[Expression ast] locals[List<Expression> params = new ArrayList<Expression>()]:
+    ID'(' (exp1=expression {$params.add($exp1.ast);} (','exp2=expression {$params.add($exp2.ast);} )*)?')' {
+            $ast = new FunctionInvocation(
+                $ID.text,
+                $params,
+                $ID.getLine(),
+                $ID.getCharPositionInLine()+1
+            );
+        }
+    | '(' exp=expression ')'{
+            $ast = $exp.ast;
+        }
+    | exp1=expression'[' exp2=expression ']'{
             $ast = new ArrayAccess(
                 $exp1.ast,
                 $exp2.ast,
@@ -67,7 +259,14 @@ expression returns[Expression ast]:
                 $exp.ast.getColumn()
             );
         }
-    | '('type')' exp=expression
+    | a='('t=primitiveType')' exp=expression{
+            $ast = new Cast(
+                $exp.ast,
+                $t.ast,
+                $a.getLine(),
+                $a.getCharPositionInLine()
+            );
+        }
     | '-' exp=expression {
             $ast = new UnaryMinus(
                 $exp.ast,

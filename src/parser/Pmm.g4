@@ -362,7 +362,7 @@ REAL_CONSTANT: DECIMAL|(DECIMAL|INT_CONSTANT)[eE][+-]?NUMBER;
 
 CHAR_CONSTANT: '\''.'\'' | '\'\\'(INT_CONSTANT | [ntr])'\'';
 
-    ID: ('_'|LETTER)('_'|LETTER|NUMBER)*;
+ID: ('_'|LETTER)('_'|LETTER|NUMBER)*;
 
 COMMENT: ('#' .*? '\r'?('\n'|EOF)| '"""' .*? '"""') -> skip;
 TRASH: (' ' | '\t' | '\n' | '\r') -> skip;

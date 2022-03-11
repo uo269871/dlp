@@ -3,11 +3,7 @@ i, j, n: int;
 c: char;
 
 # Empty function
-def p(): {
-    r: int;
-    t: double;
-    _3: double;
-}
+def p(): { }
 
 def f(n: int,r: double): int {
   	real: double;
@@ -20,6 +16,7 @@ def f(n: int,r: double): int {
 
 # Variable definition
 d: double;
+
 # Main function definition
 def main(): {
 	# Record

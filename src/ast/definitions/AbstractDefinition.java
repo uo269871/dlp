@@ -4,10 +4,11 @@ import ast.AbstractASTNode;
 import ast.Definition;
 import ast.Type;
 
-public class AbstractDefinition extends AbstractASTNode implements Definition {
+public abstract class AbstractDefinition extends AbstractASTNode implements Definition {
 
     private Type type;
     private String name;
+    private int scope;
 
     public AbstractDefinition(String name, Type type, int line, int column) {
         super(line, column);
@@ -23,5 +24,15 @@ public class AbstractDefinition extends AbstractASTNode implements Definition {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public int getScope(){
+        return scope;
+    }
+
+    @Override
+    public void setScope(int scope){
+        this.scope = scope;
     }
 }

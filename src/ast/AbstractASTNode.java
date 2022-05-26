@@ -1,6 +1,6 @@
 package ast;
 
-public class AbstractASTNode implements ASTNode{
+public abstract class AbstractASTNode implements ASTNode{
 
     private int column, line;
 
@@ -18,4 +18,6 @@ public class AbstractASTNode implements ASTNode{
     public int getColumn() {
         return column;
     }
+
+
 }

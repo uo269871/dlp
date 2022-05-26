@@ -10,8 +10,7 @@ grammar Pmm;
 
 program returns[Program ast]
         locals [List<Definition> def = new ArrayList<Definition>(),
-        List<Statement> funcDefBody = new ArrayList<Statement>(),
-        List<String> varDefNames = new ArrayList<String>();]:
+        List<Statement> funcDefBody = new ArrayList<Statement>();]:
         (d=definition {$def.addAll($d.ast);})*
         a='def' m='main' '(' ')' ':' '{'
         (v1=varDefList {$funcDefBody.addAll($v1.ast);} ';')*
@@ -63,7 +62,12 @@ definition returns [List<Definition> ast = new ArrayList<Definition>()]
 varDefList returns[List<VarDefinition> ast = new ArrayList<VarDefinition>()]
         locals[List<String> variableDefNames = new ArrayList<String>()]:
         ID1=ID {$variableDefNames.add($ID1.text);}
-        (',' ID2=ID {$variableDefNames.add($ID2.text);})* ':'
+        (',' ID2=ID {
+            if(!$variableDefNames.contains($ID2.text))
+                $variableDefNames.add($ID2.text);
+            else
+                new ErrorType("Variable repetida",$ID1.getLine(),$ID1.getCharPositionInLine());
+        })* ':'
         ty=type {
             for (String v :$variableDefNames)
                 $ast.add(
@@ -110,7 +114,7 @@ type returns [Type ast]:
                 $INT_CONSTANT.getCharPositionInLine()
             );
         }
-    | s ='struct {' fields=structFields '}' {
+    | s ='struct' '{' fields=structFields '}' {
             $ast = new RecordType(
                 $fields.struct,
                 $s.getLine(),
@@ -123,15 +127,18 @@ structFields returns [List<RecordField> struct = new ArrayList<RecordField>()] l
         (ID1=ID {$names.add($ID1.text);}
         (',' ID2=ID {$names.add($ID2.text);} )*
         ':' t=type {
-            for(String v: $names)
-                $struct.add(
-                    new RecordField(
-                        v,
-                        $t.ast,
-                        $ID1.getLine(),
-                        $ID1.getCharPositionInLine()
-                    )
-                );
+            for(String v: $names) {
+                RecordField r = new RecordField(
+                                    v,
+                                    $t.ast,
+                                    $ID1.getLine(),
+                                    $ID1.getCharPositionInLine()
+                                );
+                if(!$struct.contains(r))
+                    $struct.add(r);
+                else
+                    new ErrorType("Campo de struct repetido",$ID1.getLine(),$ID1.getCharPositionInLine());
+            }
             $names = new ArrayList<String>();
         } ';')*
     ;
@@ -147,7 +154,21 @@ statement returns [List<Statement> ast = new ArrayList<Statement>()]
     List<Statement> ifBody = new ArrayList<Statement>(),
     List<Statement> elseBody = new ArrayList<Statement>(),
     List<Expression> functionParams = new ArrayList<Expression>()]:
-        'while' exp=expression ':' (
+        ID'(' (exp1=expression {$functionParams.add($exp1.ast);}
+        (',' (exp2=expression {$functionParams.add($exp2.ast);}))*)? ')' ';'
+        {$ast.add(
+            new FunctionInvocation(
+                new Variable(
+                    $ID.text,
+                    $ID.getLine(),
+                    $ID.getCharPositionInLine()+1
+                ),
+                $functionParams,
+                $ID.getLine(),
+                $ID.getCharPositionInLine()+1)
+            );
+        }
+        | 'while' exp=expression ':' (
                 '{' (st=statement {$whileBody.addAll($st.ast);})* '}'
                 | (st1=statement {$whileBody.addAll($st1.ast);})
             ) {
@@ -176,16 +197,6 @@ statement returns [List<Statement> ast = new ArrayList<Statement>()]
                     $exp.ast.getColumn()
                 )
             );}
-        | ID'(' (exp1=expression {$functionParams.add($exp1.ast);}
-        (',' (exp2=expression {$functionParams.add($exp2.ast);}))*)? ')' ';'
-        {$ast.add(
-            new FunctionInvocation(
-                $ID.text,
-                $functionParams,
-                $ID.getLine(),
-                $ID.getCharPositionInLine()+1)
-            );
-        }
         | exp1=expression '=' exp2=expression';'{
             $ast.add(new Assignment(
                 $exp1.ast,
@@ -194,36 +205,36 @@ statement returns [List<Statement> ast = new ArrayList<Statement>()]
                 $exp1.ast.getColumn()
             ));
         }
-        | 'print' exp1=expression {
+        | p='print' exp1=expression {
             $ast.add(new Print(
                 $exp1.ast,
-                $exp1.ast.getLine(),
-                $exp1.ast.getColumn()
+                $p.getLine(),
+                $p.getCharPositionInLine()+1
             ));
         }
         (','exp2=expression {
                 $ast.add(new Print(
                     $exp2.ast,
-                    $exp2.ast.getLine(),
-                    $exp2.ast.getColumn()
+                    $p.getLine(),
+                    $p.getCharPositionInLine()+1
                 ));
             }
         )*';'
-        | 'input' exp1=expression';'{
+        | i='input' exp1=expression {
             $ast.add(new Input(
                 $exp1.ast,
-                $exp1.ast.getLine(),
-                $exp1.ast.getColumn()
+                $i.getLine(),
+                $i.getCharPositionInLine()+1
             ));
         }
-        (','exp2=expression';'{
+        (','exp2=expression {
                 $ast.add(new Input(
                     $exp2.ast,
-                    $exp2.ast.getLine(),
-                    $exp2.ast.getColumn()
+                    $i.getLine(),
+                    $i.getCharPositionInLine()+1
                 ));
             }
-        )*
+        )*';'
         | 'return' e=expression';'{
             $ast.add(new Return(
                 $e.ast, $e.ast.getLine(),$e.ast.getColumn()
@@ -232,14 +243,36 @@ statement returns [List<Statement> ast = new ArrayList<Statement>()]
     ;
 
 expression returns[Expression ast] locals[List<Expression> params = new ArrayList<Expression>()]:
-    ID'(' (exp1=expression {$params.add($exp1.ast);} (','exp2=expression {$params.add($exp2.ast);} )*)?')' {
-            $ast = new FunctionInvocation(
+    INT_CONSTANT {
+            $ast = new IntLiteral(
+                LexerHelper.lexemeToInt($INT_CONSTANT.text),
+                $INT_CONSTANT.getLine(),
+                $INT_CONSTANT.getCharPositionInLine()+1
+            );
+        }
+    | REAL_CONSTANT {
+            $ast = new RealLiteral(
+                LexerHelper.lexemeToReal($REAL_CONSTANT.text),
+                $REAL_CONSTANT.getLine(),
+                $REAL_CONSTANT.getCharPositionInLine()+1
+            );
+
+        }
+    | CHAR_CONSTANT {
+            $ast = new CharLiteral(
+                LexerHelper.lexemeToChar($CHAR_CONSTANT.text),
+                $CHAR_CONSTANT.getLine(),
+                $CHAR_CONSTANT.getCharPositionInLine()+1
+            );
+        }
+    | ID {
+            $ast = new Variable(
                 $ID.text,
-                $params,
                 $ID.getLine(),
                 $ID.getCharPositionInLine()+1
             );
         }
+
     | '(' exp=expression ')'{
             $ast = $exp.ast;
         }
@@ -317,31 +350,14 @@ expression returns[Expression ast] locals[List<Expression> params = new ArrayLis
                 $exp1.ast.getColumn()
             );
         }
-    | INT_CONSTANT {
-            $ast = new IntLiteral(
-                LexerHelper.lexemeToInt($INT_CONSTANT.text),
-                $INT_CONSTANT.getLine(),
-                $INT_CONSTANT.getCharPositionInLine()+1
-            );
-        }
-    | REAL_CONSTANT {
-            $ast = new RealLiteral(
-                LexerHelper.lexemeToReal($REAL_CONSTANT.text),
-                $REAL_CONSTANT.getLine(),
-                $REAL_CONSTANT.getCharPositionInLine()+1
-            );
-
-        }
-    | CHAR_CONSTANT {
-            $ast = new CharLiteral(
-                LexerHelper.lexemeToChar($CHAR_CONSTANT.text),
-                $CHAR_CONSTANT.getLine(),
-                $CHAR_CONSTANT.getCharPositionInLine()+1
-            );
-        }
-    | ID {
-            $ast = new Variable(
-                $ID.text,
+    | ID'(' (exp1=expression {$params.add($exp1.ast);} (','exp2=expression {$params.add($exp2.ast);} )*)?')' {
+            $ast = new FunctionInvocation(
+                new Variable(
+                    $ID.text,
+                    $ID.getLine(),
+                    $ID.getCharPositionInLine()+1
+                ),
+                $params,
                 $ID.getLine(),
                 $ID.getCharPositionInLine()+1
             );

@@ -26,7 +26,7 @@ public class IntType extends AbstractType {
 
     @Override
     public boolean isLogical() {
-        return true;
+        return false;
     }
 
     @Override
@@ -43,21 +43,11 @@ public class IntType extends AbstractType {
 
     @Override
     public Type comparison(Type t, ASTNode a){
-        if (t.equals(IntType.getInstance()) || t instanceof ErrorType)
+        if(t instanceof ErrorType)
             return t;
+        if (t.equals(IntType.getInstance()))
+            return BooleanType.getInstance();
         return new ErrorType("Tipos incompatibles", a.getLine(),a.getColumn());
-    }
-
-    @Override
-    public Type logical(Type t, ASTNode a) {
-        if(t.isLogical() || t instanceof ErrorType)
-            return t;
-        return super.logical(t, a);
-    }
-
-    @Override
-    public Type logical(ASTNode a){
-        return IntType.getInstance();
     }
 
     @Override
@@ -94,5 +84,10 @@ public class IntType extends AbstractType {
     @Override
     public String toString() {
         return "IntType";
+    }
+
+    @Override
+    public boolean canBeInput() {
+        return true;
     }
 }

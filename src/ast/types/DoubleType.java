@@ -38,8 +38,10 @@ public class DoubleType extends AbstractType {
 
     @Override
     public Type comparison(Type t, ASTNode a){
-        if (t.equals(DoubleType.getInstance()) || t instanceof ErrorType)
+        if(t instanceof ErrorType)
             return t;
+        if (t.equals(DoubleType.getInstance()))
+            return BooleanType.getInstance();
         return new ErrorType("Tipos incompatibles", a.getLine(),a.getColumn());
     }
 
@@ -77,5 +79,10 @@ public class DoubleType extends AbstractType {
     @Override
     public String toString() {
         return "DoubleType";
+    }
+
+    @Override
+    public boolean canBeInput() {
+        return true;
     }
 }

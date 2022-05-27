@@ -147,6 +147,7 @@ primitiveType returns [Type ast]:
     i='int' { $ast = IntType.getInstance();}
     | d='double' { $ast = DoubleType.getInstance();}
     | c='char' { $ast = CharType.getInstance();}
+    | b='boolean' { $ast = BooleanType.getInstance();}
     ;
 
 statement returns [List<Statement> ast = new ArrayList<Statement>()]
@@ -265,6 +266,13 @@ expression returns[Expression ast] locals[List<Expression> params = new ArrayLis
                 $CHAR_CONSTANT.getCharPositionInLine()+1
             );
         }
+    | BOOL_CONSTANT{
+        $ast = new BooleanLiteral(
+                LexerHelper.lexemeToBoolean($BOOL_CONSTANT.text),
+                $BOOL_CONSTANT.getLine(),
+                $BOOL_CONSTANT.getCharPositionInLine()+1
+            );
+        }
     | ID {
             $ast = new Variable(
                 $ID.text,
@@ -377,6 +385,8 @@ INT_CONSTANT: '0'|[1-9]NUMBER*;
 REAL_CONSTANT: DECIMAL|(DECIMAL|INT_CONSTANT)[eE][+-]?NUMBER;
 
 CHAR_CONSTANT: '\''.'\'' | '\'\\'(INT_CONSTANT | [ntr])'\'';
+
+BOOL_CONSTANT: 'true'|'false';
 
 ID: ('_'|LETTER)('_'|LETTER|NUMBER)*;
 

@@ -22,6 +22,12 @@ public class LexerHelper {
 		return -1;
 	}
 
+	public static int lexemeToBoolean(String str) {
+		if(str.equals("true"))
+			return 1;
+		return 0;
+	}
+
 	public static char lexemeToChar(String text) {
 		if (text.charAt(0) == '\'' && text.charAt(text.length()-1) == '\'') {
 			String aux = text.substring(1, text.length() - 1);

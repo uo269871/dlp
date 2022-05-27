@@ -6,7 +6,6 @@ import ast.expressions.*;
 import ast.statements.*;
 import ast.types.*;
 import visitor.AbstractVisitor;
-import visitor.Visitor;
 
 public class TypeCheckingVisitor extends AbstractVisitor<Type, Void> {
 
@@ -154,6 +153,8 @@ public class TypeCheckingVisitor extends AbstractVisitor<Type, Void> {
         super.visit(i, t);
         if (!i.getInput().getLValue())
             new ErrorType("Se esperaba un lValue", i.getLine(), i.getColumn());
+        else if(!i.getInput().getType().canBeInput())
+            new ErrorType("No se puede leer por pantalla", i.getLine(), i.getColumn());
         return null;
     }
 
@@ -172,6 +173,14 @@ public class TypeCheckingVisitor extends AbstractVisitor<Type, Void> {
 
         if(!w.getCond().getType().isLogical())
             w.getCond().setType(new ErrorType("Se esperaba un tipo lógico", w.getLine(),w.getColumn()));
+        return null;
+    }
+
+    @Override
+    public Void visit(BooleanLiteral b, Type t) {
+        super.visit(b, t);
+        b.setLValue(false);
+        b.setType(BooleanType.getInstance());
         return null;
     }
 

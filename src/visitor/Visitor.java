@@ -43,4 +43,7 @@ public interface Visitor<TP,TR> {
     public TR visit(RecordType r, TP t);
     public TR visit(VoidType v, TP t);
 
+    public TR visit(BooleanType b, TP t);
+
+    public TR visit(BooleanLiteral b, TP t);
 }

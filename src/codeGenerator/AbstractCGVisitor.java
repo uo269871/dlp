@@ -169,4 +169,14 @@ public abstract class AbstractCGVisitor<TP,TR> implements Visitor<TP,TR> {
     public TR visit(VoidType v, TP t) {
         throw new IllegalStateException("Code generation template \"VoidType\" not found in " + this.getClass().getName());
     }
+
+    @Override
+    public TR visit(BooleanType b, TP t) {
+        throw new IllegalStateException("Code generation template \"BooleanType\" not found in " + this.getClass().getName());
+    }
+
+    @Override
+    public TR visit(BooleanLiteral b, TP t) {
+        throw new IllegalStateException("Code generation template \"BooleanLiteral\" not found in " + this.getClass().getName());
+    }
 }

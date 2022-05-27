@@ -1,4 +1,4 @@
-// Generated from C:/Users/Miguel/IdeaProjects/dlp/src/parser\Pmm.g4 by ANTLR 4.10.1
+// Generated from D:/dlp/src/parser\Pmm.g4 by ANTLR 4.10.1
 package parser;
 
     import ast.*;

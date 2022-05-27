@@ -82,4 +82,9 @@ public abstract class AbstractType extends AbstractASTNode implements Type {
     public char suffix(){
         throw new IllegalStateException("Tipo no tiene sufijo");
     }
+
+    @Override
+    public boolean canBeInput() {
+        return false;
+    }
 }

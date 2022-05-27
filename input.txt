@@ -1,4 +1,4 @@
-pair:struct { 
+pair:struct {
   integer:int;
   character:char;
 };
@@ -89,3 +89,4 @@ def main(): {
     i= i + 1;
   }
 }
+

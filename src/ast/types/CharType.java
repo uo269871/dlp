@@ -39,7 +39,7 @@ public class CharType extends AbstractType {
     @Override
     public Type comparison(Type t, ASTNode a){
         if (t.equals(CharType.getInstance()))
-            return IntType.getInstance();
+            return BooleanType.getInstance();
         if (t instanceof ErrorType)
             return t;
         return new ErrorType("Tipos incompatibles", a.getLine(),a.getColumn());
@@ -79,5 +79,10 @@ public class CharType extends AbstractType {
     @Override
     public String toString() {
         return "CharType";
+    }
+
+    @Override
+    public boolean canBeInput() {
+        return true;
     }
 }

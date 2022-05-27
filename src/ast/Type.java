@@ -32,5 +32,7 @@ public interface Type extends ASTNode {
 
     public int numberOfBytes();
 
-    public char suffix(); // para otro tipos una illegalstateexception
+    public char suffix(); // Para otro tipos una illegalstateexception
+
+    public boolean canBeInput();
 }

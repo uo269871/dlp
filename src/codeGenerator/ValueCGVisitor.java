@@ -249,4 +249,14 @@ public class ValueCGVisitor extends AbstractCGVisitor<Void, Void> {
         cg.load(variable.getType());
         return null;
     }
+
+    /*
+        value[[BooleanLiteral: expression -> value:int]]() =
+            <pushi> value
+     */
+    @Override
+    public Void visit(BooleanLiteral b, Void t) {
+        cg.push(b.getValue());
+        return null;
+    }
 }

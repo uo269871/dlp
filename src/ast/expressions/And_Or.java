@@ -1,7 +1,6 @@
 package ast.expressions;
 
 import ast.Expression;
-import ast.Type;
 import visitor.Visitor;
 
 public class And_Or extends AbstractExpression {

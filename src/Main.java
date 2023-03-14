@@ -5,8 +5,6 @@ import parser.*;
 import org.antlr.v4.runtime.*;
 
 import ast.Program;
-import introspector.model.IntrospectorModel;
-import introspector.view.IntrospectorTree;
 import semantic.*;
 
 public class Main {

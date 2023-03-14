@@ -1,8 +1,5 @@
 package ast;
 
-import ast.ASTNode;
-import ast.statements.Assignment;
-
 import java.util.List;
 
 public interface Type extends ASTNode {

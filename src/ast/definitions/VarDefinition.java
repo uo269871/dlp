@@ -4,8 +4,6 @@ import ast.Statement;
 import ast.Type;
 import visitor.Visitor;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class VarDefinition extends AbstractDefinition implements Statement{
 

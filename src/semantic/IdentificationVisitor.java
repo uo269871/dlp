@@ -1,19 +1,12 @@
 package semantic;
 
 import ast.Definition;
-import ast.Expression;
-import ast.Program;
-import ast.Statement;
 import ast.definitions.FuncDefinition;
 import ast.definitions.VarDefinition;
 import ast.expressions.*;
-import ast.statements.*;
 import ast.types.*;
 import symboltable.SymbolTable;
 import visitor.AbstractVisitor;
-import visitor.Visitor;
-
-import javax.swing.plaf.nimbus.State;
 
 public class IdentificationVisitor extends AbstractVisitor<Void, Void> {
 
